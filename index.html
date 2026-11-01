@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <script>try{var _r=matchMedia('(prefers-reduced-motion: reduce)').matches,_s=navigator.connection&&navigator.connection.saveData;if(!_r&&!_s&&location.search.indexOf('intro=0')<0)document.documentElement.classList.add('intro-pending')}catch(e){}</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#062b27">
+  <meta name="description" content="Find A.S. Pool & Snooker Club locations across Ahmedabad and Gujarat. Explore the clubs, find directions, and get in touch before your next game.">
+  <meta property="og:title" content="A.S. Pool & Snooker Club | Your next game starts here">
+  <meta property="og:description" content="Find your nearest A.S. Pool & Snooker Club. Explore locations, photos and directions.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="assets/images/break-eight.webp">
+  <!-- TODO before launch: make og:image an absolute https:// URL once the final domain is known, or WhatsApp/Facebook previews will not show it. -->
+  <title>A.S. Pool & Snooker Club | One break. 13 clubs.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat+Brush&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Noto+Sans+Gujarati:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzxTGKn6uZbmxOyl5lEGwY2s7g=" crossorigin="">
+  <link rel="preload" as="image" href="assets/images/break-eight.webp">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/v3.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Ccircle cx=%2732%27 cy=%2732%27 r=%2730%27 fill=%27%230a0b0b%27/%3E%3Ccircle cx=%2732%27 cy=%2728%27 r=%2713%27 fill=%27%23f4efe3%27/%3E%3Ctext x=%2732%27 y=%2734%27 font-size=%2720%27 font-weight=%27700%27 text-anchor=%27middle%27 fill=%27%230a0b0b%27 font-family=%27Arial%27%3E8%3C/text%3E%3C/svg%3E">
+  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script defer src="data/locations.js"></script>
+  <script defer src="assets/site.js"></script>
+  <script defer src="assets/break-cinematic.js"></script>
+  <script defer src="assets/v3.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      <a href="#top" class="brand" aria-label="A.S. Pool and Snooker Club home">
+        <span class="as-emblem" aria-hidden="true"><span>A.S.</span></span><span class="brand-words"><b>A.S.</b><small>Pool &amp; Snooker Club</small></span>
+      </a>
+      <nav class="desktop-nav" aria-label="Main navigation">
+        <a href="#locations">Locations</a>
+        <a href="#how-to-play">How to play</a>
+        <a href="#gallery">Gallery</a>
+        <a href="#break-experience">The break</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <div class="nav-actions">
+        <div class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="gu" aria-pressed="false" lang="gu">ગુજ</button></div>
+        <a class="button button-small button-accent desktop-cta" href="#locations">Find a club <span aria-hidden="true">↗</span></a>
+        <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="mobile-nav" aria-label="Open menu"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+    <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation" hidden>
+      <a href="#locations">Locations</a><a href="#how-to-play">How to play</a><a href="#gallery">Gallery</a><a href="#break-experience">The break</a><a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="v3-hero" aria-labelledby="hero-title">
+      <div class="v3-hero-photo"><img src="assets/images/break-eight.webp" alt="A black 8-ball on green felt, other balls blurred behind it" fetchpriority="high" width="896" height="1344"></div>
+      <div class="container v3-hero-inner">
+        <div class="v3-brand"><span class="as-emblem" aria-hidden="true"><span>A.S.</span></span><p><b>A.S. Pool &amp; Snooker Club</b></p></div>
+        <h1 id="hero-title" class="v3-title"><span class="v3-line">One break.</span><span class="v3-line v3-line-2">13 clubs.</span></h1>
+        <p class="v3-script" aria-hidden="true">your frame</p>
+        <div class="v3-lede-block">
+          <p class="v3-lede">Snooker and pool in Ahmedabad, Gandhinagar, Anand and Nadiad. Find your nearest club and get directions in one tap.</p>
+          <div class="v3-actions">
+            <a href="#locations" class="button button-accent">Find a club <span aria-hidden="true">↗</span></a>
+            <button type="button" class="button button-ghost" data-near-me>Nearest to me</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="v3-facts" aria-label="At a glance">
+      <div class="container v3-facts-inner">
+        <ul>
+          <li><strong id="fact-clubs">13</strong> <span>clubs</span></li>
+          <li><strong id="fact-cities">4</strong> <span>cities</span></li>
+          <li><span>Directions on every listing</span></li>
+        </ul>
+        <p>Branch list from the A.S. QR directory, 31 Oct 2026</p>
+      </div>
+    </section>
+
+    <section class="section locations-section" id="locations" aria-labelledby="locations-title">
+      <div class="container">
+        <div class="section-head locations-head">
+          <div><h2 class="section-title section-title-light" id="locations-title">Find your club.</h2><p>Search by area or city, then open directions in one tap.</p></div>
+          <span class="directory-count"><b id="location-count">13</b><span>club listings<br>across Gujarat</span></span>
+        </div>
+        <div class="location-tools">
+          <label class="search-box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="m16.6 16.6 5 5"></path></svg><span class="sr-only">Search clubs by area or city</span><input type="search" id="location-search" placeholder="Search an area, city or club…" autocomplete="off"></label>
+          <div id="location-filters" class="filter-pills" role="group" aria-label="Filter locations by city">
+            <button type="button" data-filter="all" class="filter-pill is-active" aria-pressed="true">All <span>13</span></button>
+            <button type="button" data-filter="Ahmedabad" class="filter-pill" aria-pressed="false">Ahmedabad</button>
+            <button type="button" data-filter="Gandhinagar" class="filter-pill" aria-pressed="false">Gandhinagar</button>
+            <button type="button" data-filter="Anand" class="filter-pill" aria-pressed="false">Anand</button>
+            <button type="button" data-filter="Nadiad" class="filter-pill" aria-pressed="false">Nadiad</button>
+          </div>
+        </div>
+        <p id="results-summary" class="results-summary" aria-live="polite">Showing 13 locations</p>
+        <p id="near-status" class="near-status" role="status" aria-live="polite" hidden></p>
+        <div id="locations-grid" class="location-grid"></div>
+        <div class="empty-state" id="locations-empty" hidden><strong>No matching locations</strong><p>Try another neighborhood or select all locations.</p><button class="button button-outline" id="clear-search" type="button">Clear filters</button></div>
+        <p class="location-note">Branch names follow the <a href="https://qr2.me-qr.com/link-list/PR155wep/show" target="_blank" rel="noopener noreferrer">A.S. club’s QR location list ↗</a>. Photos illustrate the club atmosphere and may not depict the selected branch. For current hours and details, please contact the club directly.</p>
+      </div>
+    </section>
+
+    <section class="map-section" aria-labelledby="map-title">
+      <div class="container map-layout">
+        <div class="map-story"><h2 class="section-title" id="map-title">The way to your table.</h2><p>Pick a location from the list or a pin on the map. Then open Google Maps for turn-by-turn directions.</p><div class="map-selected" id="map-selected" aria-live="polite"><span>SELECTED CLUB</span><strong>Choose a location</strong></div><a href="#locations" class="text-link">Browse all clubs <span aria-hidden="true">↑</span></a></div>
+        <div class="map-panel"><div id="club-map" role="region" aria-label="Interactive map of club locations"><p class="map-fallback">The map needs a connection. Use the directions on each location card instead.</p></div><div class="map-footer"><span>Map pins are approximate; new branches without confirmed coordinates use directions links.</span><button id="map-fit" class="map-fit" type="button">View all locations ↗</button></div></div>
+      </div>
+    </section>
+
+    <section class="section guides-section" id="how-to-play" aria-labelledby="guides-title">
+      <div class="container guides-layout">
+        <div class="guides-head">
+          <h2 class="section-title" id="guides-title">How to play.</h2>
+          <p>New to the table? Here are the basics of five popular games. Rules vary a little from club to club, and which games each club offers is best confirmed with the club.</p>
+        </div>
+        <div class="guides-list">
+          <details class="guide">
+            <summary><span class="guide-name">Snooker</span><span class="guide-sum">Pot reds and colours in turn and score more points than your opponent.</span><span class="guide-plus" aria-hidden="true"></span></summary>
+            <div class="guide-body"><ul><li>Set-up: 15 reds, six colours and one white cue ball.</li><li>Pot a red (1 point), then choose any colour: yellow 2, green 3, brown 4, blue 5, pink 6, black 7. Potted colours go back on the table.</li><li>When the reds are gone, pot the colours in order from yellow to black. These stay down.</li><li>Foul: hitting the wrong ball first or potting the white gives your opponent at least 4 points.</li></ul><p class="guide-tip">Most points wins the frame.</p></div>
+          </details>
+          <details class="guide">
+            <summary><span class="guide-name">8-ball pool</span><span class="guide-sum">Clear your group of balls, then pot the black 8 to win.</span><span class="guide-plus" aria-hidden="true"></span></summary>
+            <div class="guide-body"><ul><li>After the break, the first player to pot a ball legally takes solids (1–7) or stripes (9–15). The other player takes the rest.</li><li>Each turn, hit one of your own balls first.</li><li>Once your group is cleared, pot the 8 in the pocket you call.</li><li>You lose the frame if you pot the 8 early or pot the white while sinking it.</li></ul><p class="guide-tip">Pocket-calling and foul rules vary by club, so ask before you play.</p></div>
+          </details>
+          <details class="guide">
+            <summary><span class="guide-name">9-ball pool</span><span class="guide-sum">Always hit the lowest-numbered ball first. Pot the 9 to win.</span><span class="guide-plus" aria-hidden="true"></span></summary>
+            <div class="guide-body"><ul><li>Rack balls 1–9 in a diamond with the 1 at the front and the 9 in the middle.</li><li>On every shot, the white must touch the lowest-numbered ball on the table first.</li><li>Any ball you pot legally stays down and you keep shooting.</li><li>Pot the 9 legally, even off the break or in a combination, and you win. A foul gives your opponent the white in hand.</li></ul><p class="guide-tip">It is quick, so a frame can be over in minutes.</p></div>
+          </details>
+          <details class="guide">
+            <summary><span class="guide-name">Rummy</span><span class="guide-sum">Arrange your 13 cards into sequences and sets, then declare.</span><span class="guide-plus" aria-hidden="true"></span></summary>
+            <div class="guide-body"><ul><li>Each player gets 13 cards. On your turn, draw one card from the closed pile or the open pile, then discard one.</li><li>You need at least two sequences, and at least one must be a pure sequence: 3 or more consecutive cards of one suit, with no joker.</li><li>The other groups can be sequences or sets (3–4 cards of the same rank in different suits). Jokers can fill gaps.</li><li>When all 13 cards fit, declare. A wrong declaration costs you points.</li></ul><p class="guide-tip">This is 13-card Indian rummy. Gin rummy and other versions have different rules.</p></div>
+          </details>
+          <details class="guide">
+            <summary><span class="guide-name">Shuffle</span><span class="guide-sum">Slide weighted pucks down the table and land them in the scoring zones.</span><span class="guide-plus" aria-hidden="true"></span></summary>
+            <div class="guide-body"><ul><li>Players take turns sliding pucks, usually four each, from one end of the table.</li><li>Zones score more the closer they are to the far end: 1, 2 and 3 points.</li><li>A puck hanging over the end edge without falling off scores the most (4).</li><li>You may knock your opponent's pucks out of the zones. Add up the points once all pucks are played.</li></ul><p class="guide-tip">Usually first to 15 or 21 points wins. Targets vary by club.</p></div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="break-section" id="break-experience" aria-labelledby="break-title">
+      <div class="container break-layout">
+        <div class="break-copy">
+          <h2 id="break-title">Take the shot.</h2>
+          <p>A short 3D break, then pick a club. Optional, no sound.</p>
+          <div class="break-actions">
+            <button id="break-trigger" type="button" class="button button-accent">Take your shot <span aria-hidden="true">↗</span></button>
+            <button id="break-skip" type="button" class="break-link">Just show locations</button>
+            <button id="break-reset" type="button" class="break-link" hidden>Play again ↺</button>
+          </div>
+          <p class="break-access-note">The club directory above works without it.</p>
+        </div>
+        <div class="break-play" id="break-play">
+          <div class="break-stage" id="break-stage" aria-label="Cinematic 3D pool break">
+            <canvas id="break-canvas" aria-hidden="true"></canvas>
+            <button class="break-poster" id="break-photo-trigger" type="button" aria-label="Take your shot: watch a cinematic 3D pool break and explore locations">
+              <img src="assets/images/break-eight.webp" alt="" loading="eager" decoding="async">
+              <span class="break-poster-shade" aria-hidden="true"></span>
+              <span class="break-poster-brand" aria-hidden="true">A.S. POOL &amp; SNOOKER</span>
+              <span class="break-poster-action" aria-hidden="true"><span class="break-play-icon">↗</span><strong>TAP TO BREAK</strong><small>13 CLUBS TO DISCOVER</small></span>
+              <span class="break-poster-foot" aria-hidden="true">THE NEXT SHOT IS YOURS</span>
+            </button>
+            <span class="break-stage-note" id="break-stage-note" aria-hidden="true">THE BREAK · IN MOTION</span>
+          </div>
+          <div id="break-results" class="break-results" hidden aria-label="Choose from the thirteen club locations">
+            <div class="break-results-heading"><strong>Where will you play?</strong><span>Choose a location to see photos and directions</span></div>
+            <div id="break-results-grid" class="break-results-grid"></div>
+          </div>
+          <p class="sr-only" id="break-live-status" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section gallery-section" id="gallery" aria-labelledby="gallery-title">
+      <div class="container"><div class="section-head gallery-head"><div><h2 class="section-title" id="gallery-title">A look inside.</h2></div><div id="gallery-filters" class="filter-pills gallery-pills" role="group" aria-label="Filter gallery"><button data-gallery="all" aria-pressed="true" class="filter-pill is-active">All photos</button><button data-gallery="snooker" aria-pressed="false" class="filter-pill">Snooker</button><button data-gallery="pool" aria-pressed="false" class="filter-pill">Pool</button><button data-gallery="spaces" aria-pressed="false" class="filter-pill">Our spaces</button></div></div><div class="gallery-grid" id="gallery-grid"></div><p class="gallery-disclaimer">Gallery includes enhanced and AI-retouched images based on club photography. Final branch-specific photos should be confirmed before publication.</p></div>
+    </section>
+
+    <section class="section contact-section" id="contact" aria-labelledby="contact-title"><div class="container contact-layout"><div><h2 class="section-title" id="contact-title">Have a question?</h2><p>Planning a group visit, an event, or a business collaboration? Tell us what you're thinking. Your message will open in your email app for you to review and send.</p><div class="contact-direct"><div><span>GENERAL ENQUIRIES</span><a href="mailto:arvindkhant3588@gmail.com">arvindkhant3588@gmail.com ↗</a></div><div><span>CLUB DIRECTIONS</span><a href="#locations">Browse locations & contact numbers ↗</a></div></div></div><form id="contact-form" class="contact-form"><div class="form-row"><label>Your name<input required name="name" autocomplete="name" placeholder="What should we call you?"></label><label>Type of enquiry<select name="type"><option value="Group visit">Group visit</option><option value="Tournament or event">Tournament or event</option><option value="Business or partnership">Business or partnership</option><option value="Other enquiry">Other enquiry</option></select></label></div><label>Your email<input required name="email" type="email" autocomplete="email" placeholder="you@example.com"></label><label>Your message<textarea required name="message" rows="5" placeholder="Tell us a little about your plans…"></textarea></label><button class="button button-accent form-submit" type="submit">Prepare email <span aria-hidden="true">↗</span></button><p class="form-note">Opens your email app. No information is submitted to this website.</p></form></div></section>
+  </main>
+
+  <footer class="footer"><div class="footer-mark" aria-hidden="true">A.S. POOL &amp; SNOOKER</div><div class="container footer-upper"><div><a href="#top" class="brand footer-brand"><span class="as-emblem" aria-hidden="true"><span>A.S.</span></span><span class="brand-words"><b>A.S.</b><small>Pool &amp; Snooker Club</small></span></a><p>For the love of the game.<br>Find your table, bring your people.</p></div><div class="footer-nav"><div><span>EXPLORE</span><a href="#locations">Locations</a><a href="#gallery">Photo gallery</a></div><div><span>GET IN TOUCH</span><a href="#contact">Enquiries</a><a href="mailto:arvindkhant3588@gmail.com">Email us</a><a href="#locations">Find a club</a></div></div></div><div class="container footer-bottom"><span>© <span id="year"></span> A.S. Pool & Snooker Club</span><span>Made for the game. Built for the people.</span><a href="#top">Back to top ↑</a></div></footer>
+
+  <div class="club-dialog" id="club-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="club-dialog-title"><div class="club-dialog-backdrop" data-close-club></div><div class="club-dialog-panel"><button type="button" class="club-dialog-close" id="club-dialog-close" aria-label="Close club details">×</button><div id="club-dialog-content"></div></div></div>
+
+  <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-labelledby="lightbox-title"><button id="lightbox-close" class="lightbox-close" type="button" aria-label="Close gallery">×</button><button id="lightbox-prev" type="button" class="lightbox-arrow lightbox-prev" aria-label="Previous photo">‹</button><div class="lightbox-stage"><img id="lightbox-image" alt=""><div class="lightbox-caption"><span id="lightbox-count"></span><strong id="lightbox-title"></strong><p id="lightbox-description"></p></div></div><button id="lightbox-next" type="button" class="lightbox-arrow lightbox-next" aria-label="Next photo">›</button></div>
+  <div class="mobile-bottom"><a href="#locations">Find a club</a><button type="button" data-near-me>Nearest to me</button></div>
+</body>
+</html>
