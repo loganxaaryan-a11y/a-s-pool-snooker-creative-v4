@@ -105,7 +105,7 @@
   }
 
 
-  /* Opening scene: the 3D break plays full-screen on load, then slides away.
+  /* Opening scene: the 3D break plays full-screen on load (about 3 seconds), then slides away.
      Skipped for reduced-motion, data-saver and no-WebGL visitors. ?intro=0 turns it off. */
   function intro() {
     const root = document.documentElement;
@@ -113,28 +113,53 @@
     const sec = $('#break-experience'), trig = $('#break-photo-trigger'), play = $('#break-play'), cv = $('#break-canvas');
     let gl = null; try { gl = cv && (cv.getContext('webgl') || cv.getContext('experimental-webgl')); } catch (e) {}
     if (!sec || !trig || !play || !gl) { root.classList.remove('intro-pending'); return; }
+    const hi = (navigator.hardwareConcurrency || 4) >= 6;
+    window.BREAK_TIMING = { speed: 1.8, duration: 3.6 };
+    window.BREAK_QUALITY = { dpr: hi ? 1.5 : 1.25, maxw: hi ? 1500 : 1200, dprPortrait: 1.25, maxwPortrait: hi ? 620 : 520 };
     const ui = document.createElement('div');
     ui.className = 'intro-ui';
-    ui.innerHTML = '<div class="intro-tag"><span class="as-emblem" aria-hidden="true"><span>A.S.</span></span><b>A.S. Pool &amp; Snooker Club</b></div>' +
+    ui.innerHTML = '<i class="intro-vig"></i><i class="intro-scrim"></i><i class="intro-grain"></i><i class="intro-bar top"></i><i class="intro-bar bot"></i>' +
+      '<div class="intro-tag"><span class="as-emblem" aria-hidden="true"><span>A.S.</span></span><b>A.S. Pool &amp; Snooker Club</b></div>' +
       '<button type="button" class="intro-skip">Skip intro</button>' +
-      '<div class="intro-brand" aria-hidden="true"><span class="as-emblem"><span>A.S.</span></span><b>A.S.</b><span class="intro-sub">Pool &amp; Snooker Club</span></div>';
+      '<div class="intro-brand" aria-hidden="true"><span class="as-emblem"><span>A.S.</span></span><span class="intro-word"><b>A.S.</b></span><i class="intro-rule"></i><span class="intro-sub">Pool &amp; Snooker Club</span></div>';
     sec.appendChild(ui);
     sec.classList.add('is-intro');
     root.classList.remove('intro-pending'); root.classList.add('intro-active');
-    let done = false;
+    let ending = false, gone = false, revealed = false;
+    function cleanup() {
+      if (!gone || !revealed) return;
+      sec.classList.remove('is-intro', 'is-leaving'); ui.remove();
+      delete window.BREAK_TIMING; delete window.BREAK_QUALITY;
+      const r = $('#break-reset'); if (r) r.click();   // put the section back to its "take the shot" state
+    }
     function end(wait) {
-      if (done) return; done = true;
+      if (ending) return; ending = true;
       setTimeout(() => {
         sec.classList.add('is-leaving');
         root.classList.remove('intro-active');
-        setTimeout(() => { sec.classList.remove('is-intro', 'is-leaving'); ui.remove(); window.scrollTo(0, 0); }, 900);
+        setTimeout(() => { gone = true; cleanup(); }, 650);
       }, wait);
     }
-    new MutationObserver(() => { if (play.classList.contains('is-revealed')) end(900); }).observe(play, { attributes: true, attributeFilter: ['class'] });
+    new MutationObserver(() => {
+      if (play.classList.contains('is-revealed')) { revealed = true; end(300); cleanup(); }
+    }).observe(play, { attributes: true, attributeFilter: ['class'] });
     ui.querySelector('.intro-skip').addEventListener('click', () => end(0));
     document.addEventListener('keydown', e => { if (e.key === 'Escape') end(0); });
-    setTimeout(() => end(0), 8000);
-    requestAnimationFrame(() => requestAnimationFrame(() => trig.click()));
+    setTimeout(() => end(0), 6000);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      trig.click();
+      // Slow device? If fewer than ~9 frames drew in the first 450 ms, drop to the original lighter resolution.
+      let n = 0; const t0 = performance.now(); const stage = $('#break-stage');
+      (function tick(now) {
+        n++;
+        if (now - t0 < 450) return requestAnimationFrame(tick);
+        if (n < 9 && stage && !ending) {
+          window.BREAK_QUALITY = { dpr: 1, maxw: 900, dprPortrait: 1, maxwPortrait: 400 };
+          stage.style.width = 'calc(100% - 1px)';
+          requestAnimationFrame(() => { stage.style.width = ''; });
+        }
+      })(t0);
+    }));
   }
 
   function start() {

@@ -208,8 +208,9 @@
       portrait=b.width<565;
       if(render){
         // 3D reflection shading is expensive on older phones; cap pixels.
-        const dpr=Math.min(window.devicePixelRatio||1,portrait?1:1.12);
-        const maxw=portrait?430:1050;
+        const q=window.BREAK_QUALITY||{};
+        const dpr=Math.min(window.devicePixelRatio||1,portrait?(q.dprPortrait||1):(q.dpr||1.12));
+        const maxw=portrait?(q.maxwPortrait||430):(q.maxw||1050);
         const w=Math.max(1,Math.min(maxw,Math.round(b.width*dpr))),h=Math.max(1,Math.round(w*b.height/b.width));
         canvas.width=w;canvas.height=h;render.gl.viewport(0,0,w,h);
       }
@@ -294,7 +295,8 @@
     function loop(now){
       if(mode!=='playing')return;
       if(!startAt)startAt=now;
-      elapsed=Math.min(4.5,(now-startAt)/1000);
+      const T=window.BREAK_TIMING||{},dur=T.duration||4.5;
+      elapsed=Math.min(dur,(now-startAt)/1000*(T.speed||1));
       // Simulation follows wall time, not render frame count. Slow devices do not
       // turn a four-second animation into a fifteen-second wait.
       while(physicsElapsed+1e-6<elapsed){
@@ -302,7 +304,7 @@
         physics(sub);physicsElapsed+=sub;
       }
       draw(elapsed);
-      if(elapsed>=4.5){finish();return;}
+      if(elapsed>=dur){finish();return;}
       frame=requestAnimationFrame(loop);
     }
     function start(instant=false){
