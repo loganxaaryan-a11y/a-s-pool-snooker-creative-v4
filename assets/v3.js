@@ -114,7 +114,11 @@
     let gl = null; try { gl = cv && (cv.getContext('webgl') || cv.getContext('experimental-webgl')); } catch (e) {}
     if (!sec || !trig || !play || !gl) { root.classList.remove('intro-pending'); return; }
     const hi = (navigator.hardwareConcurrency || 4) >= 6;
-    window.BREAK_TIMING = { speed: 1.8, duration: 3.6 };
+    // Total length in seconds (default 4.5). Try ?len=3.5, ?len=5 or ?len=7 to compare. The break itself fills all but ~1 s
+    // (0.4 s hold on the logo + 0.6 s slide-away); the simulation is time-scaled to fit.
+    const qLen = parseFloat(new URLSearchParams(location.search).get('len'));
+    const total = Math.min(12, Math.max(2.5, Number.isFinite(qLen) ? qLen : 4.5)), action = total - 1, SIM = 3.9;
+    window.BREAK_TIMING = { speed: SIM / action, duration: SIM };
     window.BREAK_QUALITY = { dpr: hi ? 1.5 : 1.25, maxw: hi ? 1500 : 1200, dprPortrait: 1.25, maxwPortrait: hi ? 620 : 520 };
     const ui = document.createElement('div');
     ui.className = 'intro-ui';
@@ -122,6 +126,7 @@
       '<div class="intro-tag"><span class="as-emblem" aria-hidden="true"><span>A.S.</span></span><b>A.S. Pool &amp; Snooker Club</b></div>' +
       '<button type="button" class="intro-skip">Skip intro</button>' +
       '<div class="intro-brand" aria-hidden="true"><span class="as-emblem"><span>A.S.</span></span><span class="intro-word"><b>A.S.</b></span><i class="intro-rule"></i><span class="intro-sub">Pool &amp; Snooker Club</span></div>';
+    ui.style.setProperty('--L', String(action));
     sec.appendChild(ui);
     sec.classList.add('is-intro');
     root.classList.remove('intro-pending'); root.classList.add('intro-active');
@@ -141,11 +146,11 @@
       }, wait);
     }
     new MutationObserver(() => {
-      if (play.classList.contains('is-revealed')) { revealed = true; end(300); cleanup(); }
+      if (play.classList.contains('is-revealed')) { revealed = true; end(400); cleanup(); }
     }).observe(play, { attributes: true, attributeFilter: ['class'] });
     ui.querySelector('.intro-skip').addEventListener('click', () => end(0));
     document.addEventListener('keydown', e => { if (e.key === 'Escape') end(0); });
-    setTimeout(() => end(0), 6000);
+    setTimeout(() => end(0), (total + 3) * 1000);
     requestAnimationFrame(() => requestAnimationFrame(() => {
       trig.click();
       // Slow device? If fewer than ~9 frames drew in the first 450 ms, drop to the original lighter resolution.

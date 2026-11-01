@@ -20,6 +20,8 @@
   uniform vec3 uEye,uLook;
   uniform float uFov,uTime,uAccent;
   uniform vec4 uBalls[16];
+  uniform vec4 uQ[16];
+  uniform sampler2D uNum;
   const float PI=3.14159265359;
   float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
   float sphereIntersect(vec3 ro,vec3 rd,vec3 center,float r){
@@ -38,78 +40,89 @@
     if(id==6.||id==14.)return vec3(.05,.39,.25);
     return vec3(.55,.09,.17);
   }
-  vec3 labelBall(vec3 color, vec3 n, float id){
-    // White circular number enamel oriented toward the visitor initially.
-    vec3 badgeForward=normalize(vec3(0.,.12,-.99));
-    float facing=dot(n,badgeForward);
-    if(facing>.888){
-      vec3 right=normalize(cross(vec3(0.,1.,0.),badgeForward));
-      vec3 up=cross(badgeForward,right);
-      vec2 p=vec2(dot(n,right),dot(n,up));
-      float rim=smoothstep(.90,.91,facing);
-      color=mix(color,vec3(.96,.95,.84),rim);
-      // Two distinct ink loops, rendering a clear 8 on the near black ball.
-      if(abs(id-8.)<.5){
-        vec2 a=(p-vec2(0.,.105))*vec2(1.12,1.07);
-        vec2 b=(p-vec2(0.,-.092))*vec2(.93,1.0);
-        float top=abs(length(a)-.108);
-        float bottom=abs(length(b)-.129);
-        float ink=(1.-smoothstep(.027,.045,min(top,bottom)))*rim;
-        color=mix(color,vec3(.040,.053,.053),ink);
-      }
-    }
-    return color;
+  vec3 qrot(vec4 q,vec3 v){return v+2.*cross(q.xyz,cross(q.xyz,v)+q.w*v);}
+  // Number decal: picks the nearest of four equatorial spots on the ball, reads the digit from the atlas.
+  vec2 decal(vec3 nl,float id){
+    float best=nl.z;vec2 p=vec2(nl.x,nl.y);
+    if(-nl.z>best){best=-nl.z;p=vec2(-nl.x,nl.y);}
+    if(nl.x>best){best=nl.x;p=vec2(-nl.z,nl.y);}
+    if(-nl.x>best){best=-nl.x;p=vec2(nl.z,nl.y);}
+    float rad=.46;
+    float d=length(p);
+    float disc=(1.-smoothstep(rad-.014,rad+.014,d))*step(.0,best);
+    vec2 uv=clamp(vec2(p.x,-p.y)/(rad*2.)+.5,.002,.998);
+    vec2 cuv=(vec2(mod(id,4.),floor(id/4.))+uv)/4.;
+    float g=texture2D(uNum,cuv).r;
+    return vec2(disc,g*disc);
   }
-  vec3 shadeBall(vec3 pos,vec3 n,vec3 rd,float id){
+  vec3 shadeBall(vec3 pos,vec3 n,vec3 rd,float id,vec4 q){
+    vec3 nl=qrot(vec4(-q.xyz,q.w),n);
     vec3 base=ballBase(id);
-    vec3 key=normalize(vec3(-.50,1.,-.65));
-    vec3 fill=normalize(vec3(.72,.55,.38));
-    float diffuse=max(dot(n,key),0.);
-    float f=max(dot(n,fill),0.);
-    float ambient=.17+max(n.y,0.)*.12;
-    vec3 c=base*(ambient+diffuse*.82+f*.24);
-    float spec=pow(max(dot(reflect(-key,n),-rd),0.),58.);
-    float spec2=pow(max(dot(reflect(-fill,n),-rd),0.),95.);
-    c+=vec3(1.,.95,.80)*spec*.77+vec3(.51,.76,.90)*spec2*.39;
-    // Broad window reflection makes the black 8-ball read as polished enamel.
-    vec3 refl=reflect(rd,n);
-    float pane=smoothstep(.70,.92,refl.y)*smoothstep(.04,.16,refl.x)* (1.-smoothstep(.52,.72,refl.x));
-    c+=vec3(.45,.56,.50)*pane*.27;
-    float edge=pow(1.-max(dot(n,-rd),0.),2.0);
-    c+=vec3(.18,.20,.15)*edge*.20;
-    if(id>0.5 && id>8.5){
-      // Subtle ivory stripes on 9–15, still truly spherical in the shader.
-      float stripe=smoothstep(.55,.63,abs(n.y));
-      c=mix(c,vec3(.76,.75,.69)*(.37+diffuse*.72)+vec3(spec*.6),stripe);
+    if(id>8.5){float cap=smoothstep(.56,.66,abs(nl.y));base=mix(base,vec3(.94,.92,.85),cap);}
+    if(id>.5){
+      vec2 dc=decal(nl,id);
+      base=mix(base,vec3(.96,.94,.86),dc.x);
+      base=mix(base,vec3(.025,.03,.035),dc.y);
     }
-    if(id>.5)c=labelBall(c,n,id);
+    vec3 L=normalize(vec3(-.18,1.,-.25));
+    float diff=clamp(dot(n,L)*.78+.22,0.,1.);
+    vec3 ambient=vec3(.06,.08,.07)+vec3(.015,.09,.06)*max(-n.y,0.)*1.3;
+    vec3 c=base*(ambient+diff*vec3(1.,.96,.86)*.95);
+    c*=mix(.5,1.,smoothstep(-.95,.15,n.y));
+    vec3 r=reflect(rd,n);
+    float fres=.05+.95*pow(1.-max(dot(n,-rd),0.),4.);
+    vec3 env=vec3(.02,.03,.03);
+    if(r.y>.02){
+      float t=(3.4-pos.y)/r.y;vec3 h=pos+r*t;
+      float lx=1.-smoothstep(.5,.78,abs(h.x));
+      float lz=smoothstep(-3.6,-3.1,h.z)*(1.-smoothstep(6.1,6.6,h.z));
+      env+=vec3(1.,.93,.78)*lx*lz*2.5;
+      env+=vec3(.10,.13,.11)*smoothstep(.2,1.,r.y)*.4;
+    }else{
+      env+=vec3(.012,.10,.065)*clamp(-r.y,0.,1.)*1.2;
+    }
+    c+=env*(fres*.92+.05);
+    c+=vec3(1.,.95,.82)*pow(max(dot(r,L),0.),200.)*1.2;
     return c;
   }
   vec3 felt(vec3 p){
-    vec2 z=p.xz;
-    vec2 a=abs(z);
-    float grain=hash(floor(z*145.));
-    float band=sin(z.x*26.+z.y*4.)*.008;
-    if(a.x<3.20 && a.y<7.5){
-      float v=.92+.055*sin(z.y*.72)+grain*.045+band;
-      vec3 green=mix(vec3(.018,.17,.118),vec3(.052,.34,.23),clamp((7.5-z.y)/18.,0.,1.));
-      green*=v;
-      float edge= max(smoothstep(3.08,3.19,a.x),smoothstep(7.37,7.49,a.y));
-      green=mix(green,vec3(.016,.13,.081),edge*.70);
+    vec2 z=p.xz;vec2 a=abs(z);
+    float pd=min(length(vec2(a.x-3.2,a.y-7.5))-.58,length(vec2(a.x-3.27,z.y))-.5);
+    if(pd<0.)return vec3(.004,.006,.005)+vec3(.06,.04,.025)*smoothstep(-.07,0.,pd);
+    float pool=.34+1.0*exp(-(z.x*z.x*.15+(z.y-1.2)*(z.y-1.2)*.026));
+    float grain=hash(floor(z*190.));float fine=hash(floor(z*610.));
+    if(a.x<3.20&&a.y<7.5){
+      float weave=.5+.5*sin(z.y*240.)*sin(z.x*240.);
+      float v=.9+.05*sin(z.y*.72)+grain*.05+fine*.03+weave*.03;
+      vec3 green=mix(vec3(.02,.2,.135),vec3(.06,.4,.27),clamp((7.5-z.y)/18.,0.,1.));
+      float edge=max(smoothstep(3.0,3.19,a.x),smoothstep(7.3,7.49,a.y));
+      green=mix(green,vec3(.012,.1,.065),edge*.8);
       float shadow=1.;
       for(int i=0;i<16;i++){
         vec2 d=z-uBalls[i].xz;
-        float r=dot(d,d);
-        shadow*=1.-.48*exp(-r*7.4);
+        shadow*=1.-.55*exp(-dot(d,d)*8.)*smoothstep(-.3,.2,uBalls[i].y);
       }
-      return green*shadow;
+      return green*v*pool*shadow;
     }
-    if(a.x<3.53 && a.y<7.8){
-      float rail=clamp((a.x-3.2)*2.3+(a.y-7.5)*2.6,0.,1.);
-      float wave=sin(z.y*5.+sin(z.x*6.))*.04;
-      return mix(vec3(.095,.067,.043),vec3(.31,.204,.113),rail)*(.83+wave+grain*.19);
+    float cx=a.x-3.2,cy=a.y-7.5;
+    float dEdge=max(cx,cy);
+    if(dEdge<.14){
+      float line=smoothstep(.0,.03,dEdge);
+      return mix(vec3(.05,.3,.2),vec3(.012,.1,.07),line)*pool*(.9+grain*.1);
     }
-    return vec3(.018,.027,.025);
+    if(a.x<3.66&&a.y<7.96){
+      float along=(cx>cy)?z.y:z.x;
+      float w=.5+.5*sin(along*7.+sin(along*31.+(cx>cy?z.x:z.y)*3.)*.5+(cx>cy?z.x:z.y)*55.);
+      vec3 wood=mix(vec3(.075,.04,.022),vec3(.34,.19,.095),w*.75+.15);
+      float rise=smoothstep(.14,.30,dEdge)*(1.-smoothstep(.40,.52,dEdge));
+      wood*=.8+rise*.6;
+      float dd=1e5;
+      if(cx>cy){dd=min(min(abs(a.y-1.875),abs(a.y-3.75)),abs(a.y-5.625));dd=length(vec2(a.x-3.43,dd));}
+      else{dd=min(abs(z.x),abs(a.x-1.6));dd=length(vec2(dd,a.y-7.77));}
+      wood=mix(wood,vec3(.92,.88,.78),1.-smoothstep(.05,.075,dd));
+      return wood*(pool*.8+.25);
+    }
+    return vec3(.014,.022,.02);
   }
   vec3 wall(vec3 p){
     float vertical=sin(p.x*.8+1.0)*.075;
@@ -125,10 +138,10 @@
     vec3 up=normalize(cross(right,forward));
     vec3 rd=normalize(forward + (right*uv.x+up*uv.y)*tan(radians(uFov)*.5)*2.);
     vec3 ro=uEye;
-    float depth=1e5; float pickedID=-1.; vec3 pickedPos=vec3(0.);
+    float depth=1e5; float pickedID=-1.; float pickIdx=-1.; vec3 pickedPos=vec3(0.);
     for(int i=0;i<16;i++){
       float t=sphereIntersect(ro,rd,uBalls[i].xyz,.295);
-      if(t<depth){depth=t;pickedID=uBalls[i].w;pickedPos=uBalls[i].xyz;}
+      if(t<depth){depth=t;pickedID=uBalls[i].w;pickedPos=uBalls[i].xyz;pickIdx=float(i);}
     }
     float ft=rd.y<-.00001?(-ro.y/rd.y):1e5;
     float wt=rd.z>.00001?(8.8-ro.z)/rd.z:1e5;
@@ -136,16 +149,15 @@
     if(pickedID>=0. && depth<ft && depth<wt){
       vec3 pos=ro+rd*depth;
       vec3 n=normalize(pos-pickedPos);
-      col=shadeBall(pos,n,rd,pickedID);
+      vec4 qq=vec4(0.,0.,0.,1.);
+      for(int i=0;i<16;i++){if(float(i)==pickIdx)qq=uQ[i];}
+      col=shadeBall(pos,n,rd,pickedID,qq);
     } else if(ft<wt && ft<1e5){
       vec3 p=ro+rd*ft;
       col=felt(p);
       float dist=length(p-ro);
       float fog=1.-exp(-dist*.022);
       col=mix(col,vec3(.028,.054,.039),fog*.55);
-      // Four restrained overhead reflections on the felt.
-      float poolGlow=exp(-pow(p.z-3.8,2.)*.15)*(.06*exp(-pow(p.x+1.5,2.)*3.)+.07*exp(-pow(p.x-1.0,2.)*3.));
-      col+=vec3(poolGlow*.6,poolGlow,poolGlow*.66);
     } else if(wt<1e5){
       col=wall(ro+rd*wt);
     } else {
@@ -168,10 +180,26 @@
     const program=gl.createProgram();gl.attachShader(program,sh(gl.VERTEX_SHADER,VERT));gl.attachShader(program,sh(gl.FRAGMENT_SHADER,FRAG));gl.linkProgram(program);
     if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));
     gl.useProgram(program);
+    // Number atlas: 4x4 cells, white digits on black. Cell index = ball number.
+    const atlas=document.createElement('canvas');atlas.width=atlas.height=1024;
+    const actx=atlas.getContext('2d');actx.fillStyle='#000';actx.fillRect(0,0,1024,1024);
+    actx.fillStyle='#fff';actx.textAlign='center';actx.textBaseline='middle';actx.font='bold 168px Arial, Helvetica, sans-serif';
+    for(let n=1;n<=15;n++){
+      const cx=(n%4)*256+128,cy=Math.floor(n/4)*256+132;
+      actx.fillText(String(n),cx,cy);
+      if(n===6||n===9)actx.fillRect(cx-46,cy+70,92,11);
+    }
+    const tex=gl.createTexture();gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,atlas);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    gl.uniform1i(gl.getUniformLocation(program,'uNum'),0);
     const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
     gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
     const posAttr=gl.getAttribLocation(program,'aPosition');gl.enableVertexAttribArray(posAttr);gl.vertexAttribPointer(posAttr,2,gl.FLOAT,false,0,0);
-    return {gl,program,u:{res:gl.getUniformLocation(program,'uRes'),eye:gl.getUniformLocation(program,'uEye'),look:gl.getUniformLocation(program,'uLook'),fov:gl.getUniformLocation(program,'uFov'),time:gl.getUniformLocation(program,'uTime'),balls:gl.getUniformLocation(program,'uBalls[0]')}};
+    return {gl,program,u:{res:gl.getUniformLocation(program,'uRes'),eye:gl.getUniformLocation(program,'uEye'),look:gl.getUniformLocation(program,'uLook'),fov:gl.getUniformLocation(program,'uFov'),time:gl.getUniformLocation(program,'uTime'),balls:gl.getUniformLocation(program,'uBalls[0]'),q:gl.getUniformLocation(program,'uQ[0]')}};
   }
   function init(){
     const canvas=$('break-canvas'),stage=$('break-stage'),play=$('break-play'),poster=$('break-photo-trigger'),trigger=$('break-trigger'),skip=$('break-skip'),reset=$('break-reset'),result=$('break-results'),grid=$('break-results-grid'),note=$('break-stage-note'),status=$('break-live-status');
@@ -187,6 +215,20 @@
     grid.addEventListener('click',e=>{const b=e.target.closest('[data-club-id]');if(b)document.dispatchEvent(new CustomEvent('as:open-club',{detail:{id:Number(b.dataset.clubId)}}));});
     const ids=[0,8,1,2,3,4,5,6,7,9,10,11,12,13,14,15];
     const R=.295;
+    const POCKETS=[[3.2,7.5,.58],[-3.2,7.5,.58],[3.2,-7.5,.58],[-3.2,-7.5,.58],[3.27,0,.5],[-3.27,0,.5]];
+    const qmul=(a,b)=>[a[3]*b[0]+a[0]*b[3]+a[1]*b[2]-a[2]*b[1],a[3]*b[1]-a[0]*b[2]+a[1]*b[3]+a[2]*b[0],a[3]*b[2]+a[0]*b[1]-a[1]*b[0]+a[2]*b[3],a[3]*b[3]-a[0]*b[0]-a[1]*b[1]-a[2]*b[2]];
+    // Start pose: a number spot faces up (so numbers read from the overhead shot), random spin about the vertical.
+    function pose(id){
+      if(id===8)return [0,1,0,0];                       // the 8 faces the opening camera
+      const f=id*2.399963,up=[0,Math.sin(f/2),0,Math.cos(f/2)],tip=[-Math.SQRT1_2,0,0,Math.SQRT1_2];
+      return qmul(up,tip);
+    }
+    function spin(b,dt){
+      const wx=b.vz/R,wz=-b.vx/R;if(wx===0&&wz===0)return;
+      const q=b.q,k=.5*dt;
+      q[0]+=k*(wx*q[3]-wz*q[1]);q[1]+=k*(-wx*q[2]+wz*q[0]);q[2]+=k*(wx*q[1]+wz*q[3]);q[3]+=k*(-wx*q[0]-wz*q[2]);
+      const l=Math.hypot(q[0],q[1],q[2],q[3])||1;q[0]/=l;q[1]/=l;q[2]/=l;q[3]/=l;
+    }
     function rack(){
       balls=[];
       balls.push({id:0,x:0,z:-5.65,vx:0,vz:0});
@@ -202,6 +244,7 @@
         balls.push({id:rackIds[k++],x,z,vx:0,vz:0});ix++;
       }
       // Fifteen physical balls in all: one white, one black, 14 in rack.
+      balls.forEach(b=>{b.q=pose(b.id);b.h=R;b.potted=false;b.sink=0;});
     }
     function size(){
       const b=stage.getBoundingClientRect();if(b.width<5)return;
@@ -221,15 +264,27 @@
       if(physicsElapsed<.46 && physicsElapsed+dt>=.46)balls[0].vz=6.15;
       const damp=Math.exp(-dt*(breakImpact?1.15:.18));
       for(let i=0;i<count;i++){
-        let b=balls[i];b.x+=b.vx*dt;b.z+=b.vz*dt;
+        let b=balls[i];
+        if(b.potted){
+          // dropping into the pocket: slide to the mouth and sink below the cloth
+          b.sink+=dt;b.h=R-b.sink*2.6;
+          b.x+=(b.px-b.x)*Math.min(1,dt*9);b.z+=(b.pz-b.z)*Math.min(1,dt*9);
+          if(b.h<-.75)b.h=-5;
+          continue;
+        }
+        b.x+=b.vx*dt;b.z+=b.vz*dt;spin(b,dt);
         b.vx*=damp;b.vz*=damp;
         if(b.x<-3.20+R){b.x=-3.20+R;b.vx=Math.abs(b.vx)*.79;}
         if(b.x>3.20-R){b.x=3.20-R;b.vx=-Math.abs(b.vx)*.79;}
         if(b.z<-7.5+R){b.z=-7.5+R;b.vz=Math.abs(b.vz)*.79;}
         if(b.z>7.5-R){b.z=7.5-R;b.vz=-Math.abs(b.vz)*.79;}
+        if(b.id!==0)for(let k=0;k<6;k++){
+          const P=POCKETS[k],dx=b.x-P[0],dz=b.z-P[1];
+          if(dx*dx+dz*dz<P[2]*P[2]){b.potted=true;b.sink=0;b.px=P[0]*.94;b.pz=P[1]*.94;b.vx=b.vz=0;break;}
+        }
       }
       for(let a=0;a<count;a++)for(let j=a+1;j<count;j++){
-        const A=balls[a],B=balls[j];const dx=B.x-A.x,dz=B.z-A.z;
+        const A=balls[a],B=balls[j];const dx=B.x-A.x,dz=B.z-A.z;if(A.potted||B.potted)continue;
         const dsq=dx*dx+dz*dz;if(dsq>(2*R+.01)**2)continue;
         const dist=Math.max(.00001,Math.sqrt(dsq)),nx=dx/dist,nz=dz/dist;
         const overlap=2*R-dist;
@@ -259,8 +314,9 @@
       const s=e(.65,2.3,t),q=e(1.55,3.1,t);
       const eye=[lerp(0,1.2,s),lerp(1.08,5.5,s),lerp(-4.4,-2.8,s)];
       const look=[lerp(0,0,s),lerp(.34,0.0,s),lerp(-1.76,2.6,s)];
-      eye[0]=lerp(eye[0],.25,q);eye[1]=lerp(eye[1],11.0,q);eye[2]=lerp(eye[2],-1.6,q);
-      look[2]=lerp(look[2],1.4,q);
+      // Landing shot: a low three-quarter view down the table (balls stay large enough to read their numbers).
+      eye[0]=lerp(eye[0],1.9,q);eye[1]=lerp(eye[1],4.3,q);eye[2]=lerp(eye[2],-6.4,q);
+      look[0]=lerp(look[0],-.25,q);look[2]=lerp(look[2],1.3,q);
       if(portrait){eye[1]*=1.23;eye[2]-=.65;}
       return {eye,look,fov:lerp(portrait?44:47,portrait?58:56,e(1.0,2.65,t))};
     }
@@ -271,11 +327,12 @@
       gl.uniform2f(u.res,canvas.width,canvas.height);
       gl.uniform3fv(u.eye,eye);gl.uniform3fv(u.look,look);
       gl.uniform1f(u.fov,fov);gl.uniform1f(u.time,t);
-      let packed=new Float32Array(16*4);
+      let packed=new Float32Array(16*4),quats=new Float32Array(16*4);
       for(let i=0;i<Math.min(16,balls.length);i++){
-        const b=balls[i];packed[4*i]=b.x;packed[4*i+1]=R;packed[4*i+2]=b.z;packed[4*i+3]=b.id;
+        const b=balls[i];packed[4*i]=b.x;packed[4*i+1]=b.h;packed[4*i+2]=b.z;packed[4*i+3]=b.id;
+        quats[4*i]=b.q[0];quats[4*i+1]=b.q[1];quats[4*i+2]=b.q[2];quats[4*i+3]=b.q[3];
       }
-      gl.uniform4fv(u.balls,packed);gl.drawArrays(gl.TRIANGLES,0,3);
+      gl.uniform4fv(u.balls,packed);gl.uniform4fv(u.q,quats);gl.drawArrays(gl.TRIANGLES,0,3);
     }
     function reveal(){
       result.hidden=false;reset.hidden=false;trigger.hidden=true;skip.hidden=true;
