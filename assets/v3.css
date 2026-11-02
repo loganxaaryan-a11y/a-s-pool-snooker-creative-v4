@@ -190,3 +190,17 @@ html.intro-pending .v3-hero-photo img,html.intro-pending .v3-script,html.intro-a
   .intro-tag b{display:none}
 }
 @media(prefers-reduced-motion:reduce){.intro-grain{animation:none}}
+
+/* Owner-supplied club identity, kept intact in a framed badge. */
+.as-logo{display:block;flex:none;width:62px;height:58px;object-fit:contain;border-radius:9px;border:1px solid #e3c58a66;box-shadow:0 5px 20px #0003;background:#a3acc5}
+.v3-brand .as-logo{width:clamp(84px,9vw,124px);height:auto;border-radius:12px}
+.footer-brand .as-logo{width:76px;height:70px}
+.intro-tag .as-logo{width:54px;height:50px}
+.intro-brand .as-logo{width:clamp(100px,13vw,170px);height:auto;opacity:0;animation:intro-pop .7s calc(var(--L,3.5)*.66s) ease forwards}
+.intro-brand b{font-size:clamp(56px,9vw,128px)}
+@media(max-width:565px){
+  .brand{gap:8px}.brand .as-logo{width:46px;height:44px}
+  .brand-words small{max-width:110px;line-height:1.35;letter-spacing:.04em}
+  .v3-brand{gap:12px}.v3-brand p{font-size:23px;max-width:220px}
+  .intro-brand{bottom:max(9vh,50px)}
+}
