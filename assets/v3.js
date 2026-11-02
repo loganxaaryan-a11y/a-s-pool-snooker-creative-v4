@@ -10,7 +10,7 @@
     'Snooker and pool in Ahmedabad, Gandhinagar, Anand and Nadiad. Find your nearest club and get directions in one tap.':'અમદાવાદ, ગાંધીનગર, આણંદ અને નડિયાદમાં સ્નૂકર અને પૂલ. તમારી નજીકની ક્લબ શોધો અને એક ટેપમાં દિશા મેળવો.',
     'Nearest to me':'મારી નજીક',
     'clubs':'ક્લબ','cities':'શહેરો','Directions on every listing':'દરેક ક્લબ માટે દિશા',
-    'Branch list from the A.S. QR directory, 31 Oct 2026':'A.S. QR ડિરેક્ટરીમાંથી ક્લબ યાદી, ૩૧ ઓક્ટોબર ૨૦૨૬',
+    'Your next game starts here.':'તમારી આગામી રમત અહીંથી શરૂ થાય છે.',
     'Find your club.':'તમારી ક્લબ શોધો.','Search by area or city, then open directions in one tap.':'વિસ્તાર અથવા શહેર પ્રમાણે શોધો, પછી એક ટેપમાં દિશા ખોલો.',
     'club listings':'ક્લબ યાદી','across Gujarat':'ગુજરાતભરમાં','Search clubs by area or city':'વિસ્તાર અથવા શહેર પ્રમાણે ક્લબ શોધો',
     'All':'બધી','Ahmedabad':'અમદાવાદ','Gandhinagar':'ગાંધીનગર','Anand':'આણંદ','Nadiad':'નડિયાદ',
@@ -23,7 +23,7 @@
     'Take the shot.':'શૉટ લગાવો.','A short 3D break, then pick a club. Optional, no sound.':'ટૂંકો 3D બ્રેક, પછી ક્લબ પસંદ કરો. વૈકલ્પિક, અવાજ વગર.',
     'Take your shot':'શૉટ લગાવો','Just show locations':'ફક્ત ક્લબ બતાવો','The club directory above works without it.':'ઉપરની ક્લબ યાદી તેના વગર પણ કામ કરે છે.',
     'A look inside.':'અંદરની એક ઝલક.','All photos':'બધા ફોટા','Pool':'પૂલ','Our spaces':'અમારી જગ્યા','SNOOKER':'સ્નૂકર','POOL':'પૂલ','THE CLUB':'ક્લબ',
-    'Gallery includes enhanced and AI-retouched images based on club photography. Final branch-specific photos should be confirmed before publication.':'ગેલેરીમાં ક્લબના ફોટા પર આધારિત એન્હાન્સ્ડ અને AI-રીટચ કરેલી છબીઓ છે.',
+    'Enhanced club photography. Images may not depict the selected branch.':'ગેલેરીમાં ક્લબના ફોટા પર આધારિત એન્હાન્સ્ડ અને AI-રીટચ કરેલી છબીઓ છે.',
     'Have a question?':'કોઈ પ્રશ્ન છે?',
     "Planning a group visit, an event, or a business collaboration? Tell us what you're thinking. Your message will open in your email app for you to review and send.":'ગ્રૂપ મુલાકાત, ઇવેન્ટ કે બિઝનેસ સહયોગ વિશે પૂછવું છે? તમારો સંદેશ તમારી ઇમેઇલ એપમાં ખુલશે, ત્યાં તપાસીને મોકલો.',
     'GENERAL ENQUIRIES':'સામાન્ય પૂછપરછ','CLUB DIRECTIONS':'ક્લબ દિશા','Browse locations & contact numbers ↗':'ક્લબ અને ફોન નંબર જુઓ ↗',
@@ -123,9 +123,9 @@
     const ui = document.createElement('div');
     ui.className = 'intro-ui';
     ui.innerHTML = '<i class="intro-vig"></i><i class="intro-scrim"></i><i class="intro-grain"></i><i class="intro-bar top"></i><i class="intro-bar bot"></i>' +
-      '<div class="intro-tag"><span class="as-emblem" aria-hidden="true"><span>A.S.</span></span><b>A.S. Pool &amp; Snooker Club</b></div>' +
+      '<div class="intro-tag"><img class="as-logo" src="assets/images/as-club-logo.svg" alt="" width="1124" height="1030"><b>A.S. Pool &amp; Snooker Club</b></div>' +
       '<button type="button" class="intro-skip">Skip intro</button>' +
-      '<div class="intro-brand" aria-hidden="true"><span class="as-emblem"><span>A.S.</span></span><span class="intro-word"><b>A.S.</b></span><i class="intro-rule"></i><span class="intro-sub">Pool &amp; Snooker Club</span></div>';
+      '<div class="intro-brand" aria-hidden="true"><img class="as-logo" src="assets/images/as-club-logo.svg" alt="" width="1124" height="1030"><span class="intro-word"><b>A.S.</b></span><i class="intro-rule"></i><span class="intro-sub">Pool &amp; Snooker Club</span></div>';
     ui.style.setProperty('--L', String(action));
     sec.appendChild(ui);
     sec.classList.add('is-intro');
