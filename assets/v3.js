@@ -23,7 +23,7 @@
     'Take the shot.':'શૉટ લગાવો.','A short 3D break, then pick a club. Optional, no sound.':'ટૂંકો 3D બ્રેક, પછી ક્લબ પસંદ કરો. વૈકલ્પિક, અવાજ વગર.',
     'Take your shot':'શૉટ લગાવો','Just show locations':'ફક્ત ક્લબ બતાવો','The club directory above works without it.':'ઉપરની ક્લબ યાદી તેના વગર પણ કામ કરે છે.',
     'A look inside.':'અંદરની એક ઝલક.','All photos':'બધા ફોટા','Pool':'પૂલ','Our spaces':'અમારી જગ્યા','SNOOKER':'સ્નૂકર','POOL':'પૂલ','THE CLUB':'ક્લબ',
-    'Enhanced club photography. Images may not depict the selected branch.':'ગેલેરીમાં ક્લબના ફોટા પર આધારિત એન્હાન્સ્ડ અને AI-રીટચ કરેલી છબીઓ છે.',
+    'Some images are AI-enhanced from club photography and may not show the selected branch.':'ગેલેરીમાં ક્લબના ફોટા પર આધારિત એન્હાન્સ્ડ અને AI-રીટચ કરેલી છબીઓ છે.',
     'Have a question?':'કોઈ પ્રશ્ન છે?',
     "Planning a group visit, an event, or a business collaboration? Tell us what you're thinking. Your message will open in your email app for you to review and send.":'ગ્રૂપ મુલાકાત, ઇવેન્ટ કે બિઝનેસ સહયોગ વિશે પૂછવું છે? તમારો સંદેશ તમારી ઇમેઇલ એપમાં ખુલશે, ત્યાં તપાસીને મોકલો.',
     'GENERAL ENQUIRIES':'સામાન્ય પૂછપરછ','CLUB DIRECTIONS':'ક્લબ દિશા','Browse locations & contact numbers ↗':'ક્લબ અને ફોન નંબર જુઓ ↗',
