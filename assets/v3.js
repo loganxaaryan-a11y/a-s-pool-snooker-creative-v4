@@ -5,6 +5,7 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const GU = {
+    'LET’S PLAY':'ચાલો રમીએ','Speak to your club.':'તમારી ક્લબનો સંપર્ક કરો.','For table availability, opening hours or a group visit, choose your nearest club and call directly.':'ટેબલની ઉપલબ્ધતા, ખુલવાનો સમય અથવા ગ્રૂપ મુલાકાત માટે તમારી નજીકની ક્લબ પસંદ કરીને સીધો ફોન કરો.','Find your club & call':'ક્લબ શોધો અને ફોન કરો','Contact a club':'ક્લબનો સંપર્ક કરો','13 clubs · Gujarat':'૧૩ ક્લબ · ગુજરાત',
     'Locations':'ક્લબ સ્થળો','Skip intro':'છોડો','How to play':'કેવી રીતે રમવું','How to play.':'કેવી રીતે રમવું.','New to the table? Here are the basics of five popular games. Rules vary a little from club to club, and which games each club offers is best confirmed with the club.':'ટેબલ પર નવા છો? પાંચ લોકપ્રિય રમતોની મૂળભૂત બાબતો અહીં છે. નિયમો ક્લબ પ્રમાણે થોડા બદલાય છે, અને કઈ ક્લબમાં કઈ રમત છે તે ક્લબ પાસેથી ખાતરી કરો.','Snooker':'સ્નૂકર','Rummy':'રમી','Shuffle':'શફલ','8-ball pool':'8-બૉલ પૂલ','9-ball pool':'9-બૉલ પૂલ','Gallery':'ફોટા','The break':'બ્રેક','Contact':'સંપર્ક','Find a club':'ક્લબ શોધો',
     'One break.':'એક બ્રેક.','13 clubs.':'૧૩ ક્લબ.','your frame':'તમારી ફ્રેમ',
     'Snooker and pool in Ahmedabad, Gandhinagar, Anand and Nadiad. Find your nearest club and get directions in one tap.':'અમદાવાદ, ગાંધીનગર, આણંદ અને નડિયાદમાં સ્નૂકર અને પૂલ. તમારી નજીકની ક્લબ શોધો અને એક ટેપમાં દિશા મેળવો.',
@@ -112,7 +113,7 @@
     if (!root.classList.contains('intro-pending')) return;
     const sec = $('#break-experience'), trig = $('#break-photo-trigger'), play = $('#break-play'), cv = $('#break-canvas');
     let gl = null; try { gl = cv && (cv.getContext('webgl') || cv.getContext('experimental-webgl')); } catch (e) {}
-    if (!sec || !trig || !play || !gl) { root.classList.remove('intro-pending'); return; }
+    if (!sec || !trig || !play) { root.classList.remove('intro-pending'); return; }
     const hi = (navigator.hardwareConcurrency || 4) >= 6;
     // Total length in seconds (default 4.5). Try ?len=3.5, ?len=5 or ?len=7 to compare. The break itself fills all but ~1 s
     // (0.4 s hold on the logo + 0.6 s slide-away); the simulation is time-scaled to fit.
@@ -123,9 +124,9 @@
     const ui = document.createElement('div');
     ui.className = 'intro-ui';
     ui.innerHTML = '<i class="intro-vig"></i><i class="intro-scrim"></i><i class="intro-grain"></i><i class="intro-bar top"></i><i class="intro-bar bot"></i>' +
-      '<div class="intro-tag"><img class="as-logo" src="assets/images/as-club-logo.svg" alt="" width="1124" height="1030"><b>A.S. Pool &amp; Snooker Club</b></div>' +
+      '<div class="intro-tag"><img class="intro-mini" src="assets/images/logo-as.webp" alt="" width="900" height="787"><b>A.S. Pool &amp; Snooker Club</b></div>' +
       '<button type="button" class="intro-skip">Skip intro</button>' +
-      '<div class="intro-brand" aria-hidden="true"><img class="as-logo" src="assets/images/as-club-logo.svg" alt="" width="1124" height="1030"><span class="intro-word"><b>A.S.</b></span><i class="intro-rule"></i><span class="intro-sub">Pool &amp; Snooker Club</span></div>';
+      '<div class="intro-brand" aria-hidden="true"><img class="intro-logo" src="assets/images/logo-as.webp" alt="" width="900" height="787"><i class="intro-rule"></i><span class="intro-sub">13 clubs · Gujarat</span></div>';
     ui.style.setProperty('--L', String(action));
     sec.appendChild(ui);
     sec.classList.add('is-intro');
@@ -133,7 +134,7 @@
     let ending = false, gone = false, revealed = false;
     function cleanup() {
       if (!gone || !revealed) return;
-      sec.classList.remove('is-intro', 'is-leaving'); ui.remove();
+      sec.classList.remove('is-intro', 'is-leaving', 'intro-static'); ui.remove();
       delete window.BREAK_TIMING; delete window.BREAK_QUALITY;
       const r = $('#break-reset'); if (r) r.click();   // put the section back to its "take the shot" state
     }
@@ -151,6 +152,7 @@
     ui.querySelector('.intro-skip').addEventListener('click', () => end(0));
     document.addEventListener('keydown', e => { if (e.key === 'Escape') end(0); });
     setTimeout(() => end(0), (total + 3) * 1000);
+    if (!gl) { sec.classList.add('intro-static'); revealed = true; setTimeout(() => end(0), 1800); return; }
     requestAnimationFrame(() => requestAnimationFrame(() => {
       trig.click();
       // Slow device? If fewer than ~9 frames drew in the first 450 ms, drop to the original lighter resolution.
