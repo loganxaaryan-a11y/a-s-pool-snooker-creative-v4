@@ -19,12 +19,12 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzxTGKn6uZbmxOyl5lEGwY2s7g=" crossorigin="">
   <link rel="preload" as="image" href="assets/images/break-eight.webp">
   <link rel="stylesheet" href="assets/site.css">
-  <link rel="stylesheet" href="assets/v3.css?v=logo-v5">
+  <link rel="stylesheet" href="assets/v3.css?v=club-map-6">
   <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <script defer src="data/locations.js"></script>
-  <script defer src="assets/site.js?v=logo-v5"></script>
-  <script defer src="assets/break-cinematic.js?v=4.1"></script>
-  <script defer src="assets/v3.js?v=logo-v5"></script>
+  <script defer src="data/locations.js?v=club-map-6"></script>
+  <script defer src="assets/site.js?v=club-map-6"></script>
+  <script defer src="assets/break-cinematic.js?v=club-map-6"></script>
+  <script defer src="assets/v3.js?v=club-map-6"></script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -38,7 +38,7 @@
         <a href="#locations">Locations</a>
         <a href="#how-to-play">How to play</a>
         <a href="#gallery">Gallery</a>
-        <a href="#break-experience">The break</a>
+        <a href="#club-locator">Club map</a>
         <a href="#contact">Contact</a>
       </nav>
       <div class="nav-actions">
@@ -48,7 +48,7 @@
       </div>
     </div>
     <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation" hidden>
-      <a href="#locations">Locations</a><a href="#how-to-play">How to play</a><a href="#gallery">Gallery</a><a href="#break-experience">The break</a><a href="#contact">Contact</a>
+      <a href="#locations">Locations</a><a href="#how-to-play">How to play</a><a href="#gallery">Gallery</a><a href="#club-locator">Club map</a><a href="#contact">Contact</a>
     </nav>
   </header>
 
@@ -104,10 +104,10 @@
       </div>
     </section>
 
-    <section class="map-section" aria-labelledby="map-title">
+    <section id="club-locator" class="map-section" aria-labelledby="map-title">
       <div class="container map-layout">
-        <div class="map-story"><h2 class="section-title" id="map-title">The way to your table.</h2><p>Pick a location from the list or a pin on the map. Then open Google Maps for turn-by-turn directions.</p><div class="map-selected" id="map-selected" aria-live="polite"><span>SELECTED CLUB</span><strong>Choose a location</strong></div><a href="#locations" class="text-link">Browse all clubs <span aria-hidden="true">↑</span></a></div>
-        <div class="map-panel"><div id="club-map" role="region" aria-label="Interactive map of club locations"><p class="map-fallback">The map needs a connection. Use the directions on each location card instead.</p></div><div class="map-footer"><span>Map pins are approximate; new branches without confirmed coordinates use directions links.</span><button id="map-fit" class="map-fit" type="button">View all locations ↗</button></div></div>
+        <div class="map-story"><h2 class="section-title" id="map-title">The way to your table.</h2><p>Tap a club or a numbered pin to explore its location. Open Google Maps for directions.</p><div id="map-club-list" class="map-club-list" aria-label="Choose a club on the map"></div><div class="map-selected" id="map-selected" aria-live="polite"><span>SELECTED CLUB</span><strong>Choose a location</strong></div><a href="#locations" class="text-link">Browse all clubs <span aria-hidden="true">↑</span></a></div>
+        <div class="map-panel"><div id="club-map" role="region" aria-label="Interactive map of club locations"><p class="map-fallback">The map needs a connection. Use the directions on each location card instead.</p></div><div class="map-footer"><span>Overview pins are approximate. Dashed pins show the K.K. Nagar and Sindhu Bhavan areas.</span><button id="map-fit" class="map-fit" type="button">Show all 13 clubs ↗</button></div></div><div class="google-detail" id="google-detail" hidden><div class="google-detail-head"><strong id="google-map-title">Selected club on Google Maps</strong><a id="google-map-link" target="_blank" rel="noopener noreferrer">Open Google Maps ↗</a></div><iframe id="google-map-frame" title="Selected club on Google Maps" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe><p>Google Maps shows results for the selected club. Use the directions link to open the full map.</p></div>
       </div>
     </section>
 

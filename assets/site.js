@@ -40,7 +40,7 @@
       <div class="location-photo"><img src="${escapeHTML(loc.image)}" alt="Enhanced view of a snooker or pool club space" loading="lazy" decoding="async"><span class="location-id">${String(loc.id).padStart(2,'0')} / 13</span><span class="location-city">${escapeHTML(loc.city)}</span></div>
       <div class="location-body"><h3>${escapeHTML(loc.name)}</h3><p class="address">${escapeHTML(loc.address)}</p>
       <div class="location-card-actions"><a class="link-directions" href="${escapeHTML(safeUrl(loc.maps))}" target="_blank" rel="noopener noreferrer" aria-label="Open directions to ${escapeHTML(loc.name)} in Google Maps">${validGeo(loc)?'Directions':'Find on Maps'} <span aria-hidden="true">↗</span></a>${noContact(loc) ? '' : `<a class="link-call" href="${phoneHref(loc.phone)}" aria-label="Call ${escapeHTML(loc.name)}">Call club</a>`}</div>
-      <div class="location-secondary-actions"><button type="button" data-open-club="${loc.id}" class="location-map-link">Explore club <span aria-hidden="true">↗</span></button>${validGeo(loc)?`<button type="button" data-show-map="${loc.id}" class="location-map-link" aria-label="Show ${escapeHTML(loc.name)} on the interactive map">See on map <span aria-hidden="true">↗</span></button>`:``}</div>
+      <div class="location-secondary-actions"><button type="button" data-open-club="${loc.id}" class="location-map-link">Explore club <span aria-hidden="true">↗</span></button>${mapped(loc)?`<button type="button" data-show-map="${loc.id}" class="location-map-link" aria-label="Show ${escapeHTML(loc.name)} on the interactive map">See on map <span aria-hidden="true">↗</span></button>`:``}</div>
       </div></article>`;
   }
   function renderLocations(){
@@ -50,14 +50,15 @@
     $('#location-count').textContent=String(locations.length);
     $('#results-summary').textContent=`Showing ${visible.length} of ${locations.length} locations`;
     $$('#location-filters button').forEach(b=>{let active=b.dataset.filter===currentFilter;b.classList.toggle('is-active',active);b.setAttribute('aria-pressed',String(active));});
-    mapMarkers.forEach(({marker,location})=>{ if(!map)return; let visibleNow=visible.some(x=>x.id===location.id); if(visibleNow&&!map.hasLayer(marker))marker.addTo(map); if(!visibleNow&&map.hasLayer(marker))map.removeLayer(marker); });
-    if(map&&visible.length){const points=visible.filter(l=>validGeo(l)).map(l=>[l.lat,l.lng]);if(points.length>0)map.fitBounds(points,{padding:[38,38],maxZoom:12,animate:!reduceMotion});}
+
   }
   function setFilter(v){currentFilter=v;renderLocations();}
   function validGeo(l){return Number.isFinite(l.lat) && Number.isFinite(l.lng) && l.lat>=-90 && l.lat<=90 && l.lng>=-180 && l.lng<=180;}
+  function mapPoint(l){return validGeo(l)?[l.lat,l.lng]:[l.mapLat,l.mapLng];}
+  function mapped(l){return mapPoint(l).every(Number.isFinite);}
   function selectedLocationContent(l) {
     const dest=safeUrl(l.maps);
-    return `<span>SELECTED CLUB</span><strong>${escapeHTML(l.name)}</strong><a href="${escapeHTML(dest)}" target="_blank" rel="noopener noreferrer">Open Google Maps ↗</a>`;
+    return `<span>SELECTED CLUB</span><strong>${escapeHTML(l.name)}</strong><p>${escapeHTML(l.address)}</p>${l.mapPrecision==='area'?'<small>Area pin · use Google Maps to find the club.</small>':''}<a href="${escapeHTML(dest)}" target="_blank" rel="noopener noreferrer">Open Google Maps ↗</a>`;
   }
   function selectLocation(id, fly=true){
     const l=locations.find(l=>l.id===Number(id));if(!l)return;
@@ -65,13 +66,24 @@
     $('#map-selected').innerHTML=selectedLocationContent(l);
     mapMarkers.forEach(({element})=>{if(element)element.classList.remove('selected')});
     let ref=mapMarkers.get(l.id);if(ref?.element)ref.element.classList.add('selected');
-    if(map&&validGeo(l)){
+    $$('#map-club-list button').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.mapClub)===l.id)));
+    $$('.location-card').forEach(c=>c.classList.toggle('is-map-selected',c.id==='location-'+l.id));
+    const detail=$('#google-detail'), frame=$('#google-map-frame');
+    detail.hidden=false;
+    $('#google-map-title').textContent=l.name+' · '+l.city;
+    $('#google-map-link').href=safeUrl(l.maps);
+    const src='https://www.google.com/maps?q='+encodeURIComponent('A.S. Pool & Snooker Club '+l.name+' '+l.address)+'&output=embed';
+    if(frame.getAttribute('src')!==src)frame.src=src;
+    frame.title='Google Maps: '+l.name;
+    if(map&&mapped(l)&&ref){
       if(!map.hasLayer(ref.marker))ref.marker.addTo(map);
-      if(fly)map.flyTo([l.lat,l.lng],Math.max(map.getZoom(),12),{duration:reduceMotion?0:0.65});
+      if(fly)map.flyTo(mapPoint(l),l.mapPrecision==='area'?14:15,{duration:reduceMotion?0:0.65});
       ref.marker.openPopup();
     }
   }
   function initMap(){
+    $('#map-club-list').innerHTML=locations.map(l=>`<button type="button" data-map-club="${l.id}" aria-pressed="false"><span>${String(l.id).padStart(2,'0')}</span><strong>${escapeHTML(l.name)}</strong><small>${escapeHTML(l.city)}</small></button>`).join('');
+    $('#map-club-list').addEventListener('click',e=>{const b=e.target.closest('[data-map-club]');if(b)selectLocation(b.dataset.mapClub);});
     const holder=$('#club-map');if(!holder)return;
     if(!window.L){holder.classList.add('map-unavailable');return;}
     try{
@@ -79,19 +91,19 @@
       map=L.map('club-map',{scrollWheelZoom:false,zoomControl:true,preferCanvas:true}).setView([23.038,72.58],10);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:18}).addTo(map);
       for(const l of locations){
-        if(!validGeo(l))continue;
-        const el=L.DomUtil.create('div','custom-marker');el.textContent=String(l.id).padStart(2,'0');
+        if(!mapped(l))continue;
+        const el=L.DomUtil.create('div','custom-marker'+(l.mapPrecision==='area'?' area-marker':''));el.textContent=String(l.id).padStart(2,'0');
         const icon=L.divIcon({html:el,iconSize:[29,29],iconAnchor:[14,14],className:'marker-wrapper'});
-        const marker=L.marker([l.lat,l.lng],{icon}).addTo(map);
-        marker.bindPopup(`<strong>${escapeHTML(l.name)}</strong><div>${escapeHTML(l.city)}</div><a href="${escapeHTML(safeUrl(l.maps))}" target="_blank" rel="noopener noreferrer">Directions ↗</a>`);
+        const marker=L.marker(mapPoint(l),{icon,title:l.name,alt:l.name}).addTo(map);
+        marker.bindPopup(`<strong>${escapeHTML(l.name)}</strong><div>${escapeHTML(l.city)}</div>${l.mapPrecision==='area'?'<small>Approximate area</small>':''}<a href="${escapeHTML(safeUrl(l.maps))}" target="_blank" rel="noopener noreferrer">Directions ↗</a>`);
         marker.on('click',()=>selectLocation(l.id,false));
         mapMarkers.set(l.id,{marker,location:l,element:el});
       }
       fitMap();
-      if(locations.length) selectLocation(locations[0].id,false);
+
     }catch(err){ console.warn('Interactive map unavailable',err);holder.innerHTML='<p class="map-fallback">Map unavailable. Use the directions on the club cards instead.</p>';map=null; }
   }
-  function fitMap(){if(!map)return;const pts=visibleLocations().filter(l=>validGeo(l)).map(l=>[l.lat,l.lng]);if(pts.length)map.fitBounds(pts,{padding:[38,38],maxZoom:12});}
+  function fitMap(){if(!map)return;const pts=locations.filter(mapped).map(mapPoint);if(pts.length)map.fitBounds(pts,{padding:[38,38],maxZoom:12});}
 
 
   let lastClubFocus=null;

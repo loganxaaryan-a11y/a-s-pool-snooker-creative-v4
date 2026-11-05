@@ -5,6 +5,7 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const GU = {
+    'Club map':'ક્લબનો નકશો','Show all 13 clubs ↗':'બધી ૧૩ ક્લબ બતાવો ↗','Tap a club or a numbered pin to explore its location. Open Google Maps for directions.':'સ્થાન જોવા ક્લબ અથવા નંબરવાળો પિન પસંદ કરો. દિશા માટે Google Maps ખોલો.','Overview pins are approximate. Dashed pins show the K.K. Nagar and Sindhu Bhavan areas.':'પિન અંદાજિત છે. તૂટક રેખાવાળા પિન કે.કે. નગર અને સિંધુ ભવનનો વિસ્તાર બતાવે છે.','Area pin · use Google Maps to find the club.':'વિસ્તારનો પિન · ક્લબ શોધવા Google Maps ખોલો.','Google Maps shows results for the selected club. Use the directions link to open the full map.':'Google Maps પસંદ કરેલી ક્લબના પરિણામો બતાવે છે. સંપૂર્ણ નકશો ખોલવા દિશાની લિંક વાપરો.',
     'LET’S PLAY':'ચાલો રમીએ','Speak to your club.':'તમારી ક્લબનો સંપર્ક કરો.','For table availability, opening hours or a group visit, choose your nearest club and call directly.':'ટેબલની ઉપલબ્ધતા, ખુલવાનો સમય અથવા ગ્રૂપ મુલાકાત માટે તમારી નજીકની ક્લબ પસંદ કરીને સીધો ફોન કરો.','Find your club & call':'ક્લબ શોધો અને ફોન કરો','Contact a club':'ક્લબનો સંપર્ક કરો','13 clubs · Gujarat':'૧૩ ક્લબ · ગુજરાત',
     'Locations':'ક્લબ સ્થળો','Skip intro':'છોડો','How to play':'કેવી રીતે રમવું','How to play.':'કેવી રીતે રમવું.','New to the table? Here are the basics of five popular games. Rules vary a little from club to club, and which games each club offers is best confirmed with the club.':'ટેબલ પર નવા છો? પાંચ લોકપ્રિય રમતોની મૂળભૂત બાબતો અહીં છે. નિયમો ક્લબ પ્રમાણે થોડા બદલાય છે, અને કઈ ક્લબમાં કઈ રમત છે તે ક્લબ પાસેથી ખાતરી કરો.','Snooker':'સ્નૂકર','Rummy':'રમી','Shuffle':'શફલ','8-ball pool':'8-બૉલ પૂલ','9-ball pool':'9-બૉલ પૂલ','Gallery':'ફોટા','The break':'બ્રેક','Contact':'સંપર્ક','Find a club':'ક્લબ શોધો',
     'One break.':'એક બ્રેક.','13 clubs.':'૧૩ ક્લબ.','your frame':'તમારી ફ્રેમ',
@@ -134,6 +135,7 @@
     let ending = false, gone = false, revealed = false;
     function cleanup() {
       if (!gone || !revealed) return;
+      introObserver.disconnect();
       sec.classList.remove('is-intro', 'is-leaving', 'intro-static'); ui.remove();
       delete window.BREAK_TIMING; delete window.BREAK_QUALITY;
       const r = $('#break-reset'); if (r) r.click();   // put the section back to its "take the shot" state
@@ -146,9 +148,10 @@
         setTimeout(() => { gone = true; cleanup(); }, 650);
       }, wait);
     }
-    new MutationObserver(() => {
+    const introObserver = new MutationObserver(() => {
       if (play.classList.contains('is-revealed')) { revealed = true; end(400); cleanup(); }
-    }).observe(play, { attributes: true, attributeFilter: ['class'] });
+    });
+    introObserver.observe(play, { attributes: true, attributeFilter: ['class'] });
     ui.querySelector('.intro-skip').addEventListener('click', () => end(0));
     document.addEventListener('keydown', e => { if (e.key === 'Escape') end(0); });
     setTimeout(() => end(0), (total + 3) * 1000);

@@ -116,7 +116,11 @@
     "id": 7,
     "name": "K.K. Nagar",
     "branchNameSource": "Owner-shared A.S. QR directory (2026-10-31)",
-    "ownerVerificationNeeded": true
+    "ownerVerificationNeeded": true,
+    "mapLat": 23.0716409,
+    "mapLng": 72.5484422,
+    "mapPrecision": "area",
+    "mapSource": "K.K. Nagar Road area reference: https://in.near-place.com/gas_station-nearby-umiya-motors-service-station-1-2-shankar-da-row-house-k-k-nagar-road-near-umiya-hall-ghatlodiya-ahmedabad"
   },
   {
     "id": 8,
@@ -190,7 +194,7 @@
     "slug": "sindhu-bhavan",
     "city": "Ahmedabad",
     "address": "Sindhu Bhavan, Ahmedabad, Gujarat",
-    "maps": "https://www.google.com/maps/search/?api=1&query=A.S.%20Pool%20%26%20Snooker%20Club%20Sindhu%20Bhavan%20Ahmedabad",
+    "maps": "https://www.google.com/search?kgmid=/g/11zz5wln9l",
     "phone": "",
     "lat": null,
     "lng": null,
@@ -201,7 +205,11 @@
     "id": 12,
     "name": "Sindhu Bhavan",
     "branchNameSource": "Owner-shared A.S. QR directory (2026-10-31)",
-    "ownerVerificationNeeded": true
+    "ownerVerificationNeeded": true,
+    "mapLat": 23.0393426,
+    "mapLng": 72.5241685,
+    "mapPrecision": "area",
+    "mapSource": "Sindhu Bhavan Marg area reference: https://vizman.app/media/qniozakp/vizman-user-manual-admin-vms.pdf"
   },
   {
     "id": 13,

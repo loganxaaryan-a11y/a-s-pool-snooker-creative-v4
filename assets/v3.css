@@ -259,3 +259,26 @@ html.intro-pending body::before{background:#041a17 url('images/logo-as.webp') ce
 @media(max-width:380px){.site-header .brand-words{display:none}}
 
 .location-card-actions a:only-child{grid-column:1 / -1}
+
+/* Keep the break as the opening scene, with no duplicate section in the page. */
+#break-experience:not(.is-intro){display:none}
+#break-experience.is-intro{display:block}
+.map-layout{grid-template-columns:minmax(270px,.8fr) minmax(0,1.4fr);gap:32px;align-items:start}
+.map-story{grid-row:span 2}
+.map-story .section-title{font-size:clamp(40px,4.5vw,66px)}
+.map-club-list{display:grid;max-height:350px;overflow-y:auto;gap:6px;margin:24px 0;padding:3px;overscroll-behavior:contain}
+.map-club-list button{display:grid;grid-template-columns:34px 1fr;column-gap:10px;text-align:left;padding:12px;background:#ffffff82;border:1px solid #c8cdc3;border-radius:6px;color:#052622;min-height:60px}
+.map-club-list button>span{grid-row:span 2;align-self:center;background:#0b5a50;color:#fff;border-radius:50%;width:30px;height:30px;display:grid;place-items:center;font-size:11px;font-weight:800}
+.map-club-list strong{font-size:14px}.map-club-list small{font-size:11px;color:#4b645b;margin-top:4px}
+.map-club-list button[aria-pressed=true]{background:#fff5cb;border-color:#887000;box-shadow:0 0 0 1px #887000}
+.map-selected p{font-size:13px!important;margin:6px 0!important}.map-selected small{font-size:12px;color:#526857}
+.area-marker{border-style:dashed!important;background:#f4efe3!important;color:#052622!important}
+.custom-marker.selected{outline:3px solid #fff;box-shadow:0 0 0 6px #05262280}
+.google-detail{grid-column:2;background:#faf6ec;border:1px solid #c8cdc3;border-radius:12px;overflow:hidden}
+.google-detail[hidden]{display:none}
+.google-detail-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;padding:18px;font-size:14px}
+.google-detail-head a{font-weight:700;text-decoration:underline;text-underline-offset:3px;font-size:12px}
+.google-detail iframe{display:block;border:0;width:100%;height:320px;background:#e7e3d3}
+.google-detail>p{font-size:11px;line-height:1.6;padding:12px 18px;color:#526857}
+.location-card.is-map-selected{box-shadow:0 0 0 3px #ffc20e}
+@media(max-width:800px){.map-layout{grid-template-columns:1fr;gap:20px}.map-story{grid-row:auto}.map-club-list{max-height:240px}.google-detail{grid-column:1}.map-panel #club-map{height:380px}.google-detail iframe{height:300px}}

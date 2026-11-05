@@ -329,7 +329,7 @@
       reveal();draw(3.3);
       // No automatic jump unless the location choices are offscreen.
       postTimer=window.setTimeout(()=>{
-        if(document.hidden||result.hidden)return;
+        if(document.hidden||result.hidden||stage.closest('.is-intro'))return;
         const r=result.getBoundingClientRect();if(r.bottom>innerHeight-20&&r.top>innerHeight-40)result.scrollIntoView({behavior:reduce.matches?'auto':'smooth',block:'nearest'});
       },220);
     }
