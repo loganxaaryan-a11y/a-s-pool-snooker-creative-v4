@@ -7,7 +7,7 @@
   const $ = (s,root=document) => root.querySelector(s);
   const $$ = (s,root=document) => Array.from(root.querySelectorAll(s));
   const escapeHTML = v => String(v ?? '').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  const safeUrl = v => typeof v==='string' && /^https:\/\//i.test(v) ? v : '#locations';
+  const directionsUrl = loc => 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent('A.S. Pool & Snooker Club ' + loc.name + ', ' + loc.address);
   const clubImages = {"1":["snooker-row","hall-dark","hall-players"],"2":["snooker-classic","snooker-center","hall-wood"],"3":["hall-cream","hall-modern","brand-exterior"],"4":["hall-dark","hall-players","snooker-row"],"5":["hall-wood","snooker-classic","snooker-detail"],"6":["snooker-center","snooker-detail","pool-balls"],"7":["hall-players","snooker-row","pool-balls"],"8":["hero-hall","pool-multi","pool-reception"],"9":["pool-multi","snooker-green","pool-balls"],"10":["hall-modern","pool-reception","hall-cream"],"11":["pool-reception","snooker-green","brand-entrance"],"12":["snooker-green","pool-multi","hall-modern"],"13":["snooker-detail","snooker-classic","pool-balls"]};
   const phoneHref = v => 'tel:' + String(v||'').replace(/[^\d+]/g,'');
   const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -39,7 +39,7 @@
     return `<article class="location-card" id="location-${loc.id}">
       <div class="location-photo"><img src="${escapeHTML(loc.image)}" alt="Enhanced view of a snooker or pool club space" loading="lazy" decoding="async"><span class="location-id">${String(loc.id).padStart(2,'0')} / 13</span><span class="location-city">${escapeHTML(loc.city)}</span></div>
       <div class="location-body"><h3>${escapeHTML(loc.name)}</h3><p class="address">${escapeHTML(loc.address)}</p>
-      <div class="location-card-actions"><a class="link-directions" href="${escapeHTML(safeUrl(loc.maps))}" target="_blank" rel="noopener noreferrer" aria-label="Open directions to ${escapeHTML(loc.name)} in Google Maps">${validGeo(loc)?'Directions':'Find on Maps'} <span aria-hidden="true">↗</span></a>${noContact(loc) ? '' : `<a class="link-call" href="${phoneHref(loc.phone)}" aria-label="Call ${escapeHTML(loc.name)}">Call club</a>`}</div>
+      <div class="location-card-actions"><a class="link-directions" href="${escapeHTML(directionsUrl(loc))}" target="_blank" rel="noopener noreferrer" aria-label="Open directions to ${escapeHTML(loc.name)} in Google Maps">${validGeo(loc)?'Directions':'Find on Maps'} <span aria-hidden="true">↗</span></a>${noContact(loc) ? '' : `<a class="link-call" href="${phoneHref(loc.phone)}" aria-label="Call ${escapeHTML(loc.name)}">Call club</a>`}</div>
       <div class="location-secondary-actions"><button type="button" data-open-club="${loc.id}" class="location-map-link">Explore club <span aria-hidden="true">↗</span></button>${mapped(loc)?`<button type="button" data-show-map="${loc.id}" class="location-map-link" aria-label="Show ${escapeHTML(loc.name)} on the interactive map">See on map <span aria-hidden="true">↗</span></button>`:``}</div>
       </div></article>`;
   }
@@ -57,7 +57,7 @@
   function mapPoint(l){return validGeo(l)?[l.lat,l.lng]:[l.mapLat,l.mapLng];}
   function mapped(l){return mapPoint(l).every(Number.isFinite);}
   function selectedLocationContent(l) {
-    const dest=safeUrl(l.maps);
+    const dest=directionsUrl(l);
     return `<span>SELECTED CLUB</span><strong>${escapeHTML(l.name)}</strong><p>${escapeHTML(l.address)}</p>${l.mapPrecision==='area'?'<small>Area pin · use Google Maps to find the club.</small>':''}<a href="${escapeHTML(dest)}" target="_blank" rel="noopener noreferrer">Open Google Maps ↗</a>`;
   }
   function selectLocation(id, fly=true){
@@ -71,7 +71,7 @@
     const detail=$('#google-detail'), frame=$('#google-map-frame');
     detail.hidden=false;
     $('#google-map-title').textContent=l.name+' · '+l.city;
-    $('#google-map-link').href=safeUrl(l.maps);
+    $('#google-map-link').href=directionsUrl(l);
     const src='https://www.google.com/maps?q='+encodeURIComponent('A.S. Pool & Snooker Club '+l.name+' '+l.address)+'&output=embed';
     if(frame.getAttribute('src')!==src)frame.src=src;
     frame.title='Google Maps: '+l.name;
@@ -95,7 +95,7 @@
         const el=L.DomUtil.create('div','custom-marker'+(l.mapPrecision==='area'?' area-marker':''));el.textContent=String(l.id).padStart(2,'0');
         const icon=L.divIcon({html:el,iconSize:[29,29],iconAnchor:[14,14],className:'marker-wrapper'});
         const marker=L.marker(mapPoint(l),{icon,title:l.name,alt:l.name}).addTo(map);
-        marker.bindPopup(`<strong>${escapeHTML(l.name)}</strong><div>${escapeHTML(l.city)}</div>${l.mapPrecision==='area'?'<small>Approximate area</small>':''}<a href="${escapeHTML(safeUrl(l.maps))}" target="_blank" rel="noopener noreferrer">Directions ↗</a>`);
+        marker.bindPopup(`<strong>${escapeHTML(l.name)}</strong><div>${escapeHTML(l.city)}</div>${l.mapPrecision==='area'?'<small>Approximate area</small>':''}<a href="${escapeHTML(directionsUrl(l))}" target="_blank" rel="noopener noreferrer">Directions ↗</a>`);
         marker.on('click',()=>selectLocation(l.id,false));
         mapMarkers.set(l.id,{marker,location:l,element:el});
       }
@@ -111,7 +111,7 @@
     const loc=locations.find(l=>l.id===Number(id));if(!loc)return;
     const pictures=clubImages[loc.id]||['hero-hall','hall-cream','pool-balls'];
     const mainImg=pictures[0],other=pictures.slice(1);
-    $('#club-dialog-content').innerHTML=`<div class="club-dialog-images"><img class="club-dialog-main-image" src="${imagePath(mainImg)}" alt="Enhanced club atmosphere photograph"><div class="club-dialog-images-side">${other.map(im=>`<img src="${imagePath(im)}" alt="Enhanced snooker or pool club atmosphere">`).join('')}</div></div><div class="club-dialog-details"><p class="eyebrow"><span class="eyebrow-line"></span> ${escapeHTML(loc.city)} · CLUB ${String(loc.id).padStart(2,'0')}</p><h2 id="club-dialog-title">${escapeHTML(loc.name)}</h2><p class="club-dialog-address">${escapeHTML(loc.address)}</p><p class="club-dialog-note">Photos are illustrative and may not show this branch. Please check amenities with the club.</p><div class="club-dialog-links"><a class="button button-accent" href="${escapeHTML(safeUrl(loc.maps))}" target="_blank" rel="noopener noreferrer">${validGeo(loc)?'Get directions':'Find on Maps'} ↗</a>${noContact(loc)?'':`<a class="button button-outline" href="${phoneHref(loc.phone)}">Call club ↗</a>`}</div></div>`;
+    $('#club-dialog-content').innerHTML=`<div class="club-dialog-images"><img class="club-dialog-main-image" src="${imagePath(mainImg)}" alt="Enhanced club atmosphere photograph"><div class="club-dialog-images-side">${other.map(im=>`<img src="${imagePath(im)}" alt="Enhanced snooker or pool club atmosphere">`).join('')}</div></div><div class="club-dialog-details"><p class="eyebrow"><span class="eyebrow-line"></span> ${escapeHTML(loc.city)} · CLUB ${String(loc.id).padStart(2,'0')}</p><h2 id="club-dialog-title">${escapeHTML(loc.name)}</h2><p class="club-dialog-address">${escapeHTML(loc.address)}</p><p class="club-dialog-note">Photos are illustrative and may not show this branch. Please check amenities with the club.</p><div class="club-dialog-links"><a class="button button-accent" href="${escapeHTML(directionsUrl(loc))}" target="_blank" rel="noopener noreferrer">${validGeo(loc)?'Get directions':'Find on Maps'} ↗</a>${noContact(loc)?'':`<a class="button button-outline" href="${phoneHref(loc.phone)}">Call club ↗</a>`}</div></div>`;
     lastClubFocus=document.activeElement;$('#club-dialog').hidden=false;document.body.classList.add('modal-open');$('#club-dialog-close').focus();
   }
   function closeClubDialog(){if($('#club-dialog').hidden)return;$('#club-dialog').hidden=true;document.body.classList.remove('modal-open');$('#club-dialog-content').innerHTML='';if(lastClubFocus?.isConnected)lastClubFocus.focus();}
